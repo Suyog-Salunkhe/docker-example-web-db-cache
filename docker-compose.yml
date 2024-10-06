@@ -1,0 +1,44 @@
+services:
+  candidate-service:
+    build:
+      context: ./candidate-service
+    image: candidate_service
+    container_name: candidate-service-container
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database-service
+      - redis-server
+    networks:
+      - candidate-service-network
+
+  database-service:
+    build:
+      context: ./database-service
+    image: database_service
+    container_name: database-container
+    environment:
+      MYSQL_DATABASE: db-candidate-service
+      MYSQL_PASSWORD: root@456
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database-service/sql/:/docker-entrypoint-initdb.d
+    networks:
+      - candidate-service-network
+
+  redis-server:
+    image: redis:alpine
+    container_name: redis-container
+    ports:
+      - "6379:6379"
+    networks:
+      - candidate-service-network
+
+volumes:
+  db_data:
+  
+networks:
+  candidate-service-network:
+    driver: bridge

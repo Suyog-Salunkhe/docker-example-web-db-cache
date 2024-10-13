@@ -41,3 +41,26 @@ jobs:
       # Step 5: Set up Docker Buildx (optional, for multi-platform builds)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+
+      # Step 6: Log in to Docker Hub (Update to v2)
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Step 7: Build the Docker image for the candidate service
+      - name: Build web service Docker image
+        run: docker build -t sygdock/candidate-service:latest .
+
+      # Step 8: Push the Docker image to Docker Hub
+      - name: Push Docker image
+        run: docker push sygdock/candidate-service:latest
+
+      # Step 9: Run services using Docker Compose for testing
+      - name: Start services with Docker Compose
+        run: docker-compose up -d
+
+      # Step 11: Clean up the Docker environment after tests
+      - name: Tear down services
+        run: docker-compose down

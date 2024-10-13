@@ -35,4 +35,5 @@ jobs:
 
       # Step 4: Build and package the application using Maven
       - name: Build with Maven
+        working-directory: ./web-service
         run: mvn clean package

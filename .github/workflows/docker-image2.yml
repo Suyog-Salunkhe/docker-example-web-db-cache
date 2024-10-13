@@ -51,6 +51,7 @@ jobs:
 
       # Step 7: Build the Docker image for the candidate service
       - name: Build web service Docker image
+        working-directory: ./candidate-service
         run: docker build -t sygdock/candidate-service:latest .
 
       # Step 8: Push the Docker image to Docker Hub

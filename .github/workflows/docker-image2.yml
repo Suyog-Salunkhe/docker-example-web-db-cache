@@ -21,6 +21,8 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
+          distribution: temurin
+          cache: maven
 
       # Step 3: Cache Maven dependencies to speed up builds
       - name: Cache Maven packages

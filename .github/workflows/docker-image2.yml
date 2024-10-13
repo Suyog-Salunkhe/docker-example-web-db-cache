@@ -49,16 +49,22 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 7: Build the Docker image for the candidate service
+      # Step 7: Install Docker Compose
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      # Step 8: Build the Docker image for the candidate service
       - name: Build web service Docker image
         working-directory: ./candidate-service
         run: docker build -t sygdock/candidate-service:latest .
 
-      # Step 8: Push the Docker image to Docker Hub
+      # Step 9: Push the Docker image to Docker Hub
       - name: Push Docker image
         run: docker push sygdock/candidate-service:latest
 
-      # Step 9: Run services using Docker Compose for testing
+      # Step 10: Run services using Docker Compose for testing
       - name: Start services with Docker Compose
         run: docker-compose up -d
 

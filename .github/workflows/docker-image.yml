@@ -1,12 +1,12 @@
-name: CI/CD Pipeline
+name: Candidate Service CI/CD Pipeline
 
 on:
   push:
     branches:
-      - test
+      - main
   pull_request:
     branches:
-      - test
+      - main
 
 jobs:
   build-and-test:
@@ -14,17 +14,19 @@ jobs:
     steps:
       # Step 1: Checkout the code
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Step 2: Set up JDK 17 for Maven build
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
+          distribution: temurin
+          cache: maven
 
       # Step 3: Cache Maven dependencies to speed up builds
       - name: Cache Maven packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -33,5 +35,39 @@ jobs:
 
       # Step 4: Build and package the application using Maven
       - name: Build with Maven
-        run: mvn clean package -DskipTests=true
+        working-directory: ./candidate-service
+        run: mvn clean package
 
+      # Step 5: Set up Docker Buildx (optional, for multi-platform builds)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Step 6: Log in to Docker Hub (Update to v2)
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Step 7: Install Docker Compose
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      # Step 8: Build the Docker image for the candidate service
+      - name: Build web service Docker image
+        working-directory: ./candidate-service
+        run: docker build -t sygdock/candidate-service:latest .
+
+      # Step 9: Push the Docker image to Docker Hub
+      - name: Push Docker image
+        run: docker push sygdock/candidate-service:latest
+
+      # Step 10: Run services using Docker Compose for testing
+      - name: Start services with Docker Compose
+        run: docker-compose up -d
+
+      # Step 11: Clean up the Docker environment after tests
+      - name: Tear down services
+        run: docker-compose down
